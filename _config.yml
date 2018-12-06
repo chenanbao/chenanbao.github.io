@@ -55,7 +55,10 @@ highlighter: rouge
 kramdown:
   input: GFM                            # use Github Flavored Markdown !important
 
-
+# MathJax Support
+mathjax:
+  enable: true
+  per_page: true
 
 # 评论系统
 # Disqus（https://disqus.com/）
