@@ -1,0 +1,277 @@
+属性：
+
+Properties
+{
+    _MyTexture ("My texture", 2D) = "white" {}
+    _MyNormalMap ("My normal map", 2D) = "bump" {}  // Grey
+
+    _MyInt ("My integer", Int) = 2
+    _MyFloat ("My float", Float) = 1.5
+    _MyRange ("My range", Range(0.0, 1.0)) = 0.5
+
+    _MyColor ("My colour", Color) = (1, 0, 0, 1)    // (R, G, B, A)
+    _MyVector ("My Vector4", Vector) = (0, 0, 0, 0) // (x, y, z, w)
+}
+
+//使用一个结构体来定义顶点着色器的输入
+struct a2v
+{
+        float4 vertex : POSITION;//POSITION语义告诉Unity，用模型空间的顶点坐标填充vertex变量
+        float3 normal:NORMAL;//NORMAL语义告诉Unity，用模型空间的法线方向填充normal变量
+        float4 texcoord:TEXCOORD0;//TEXCOORDO语义告诉Unity，用模型的第一套纹理坐标填充texcoord变量
+        float4 texcoord1 : TEXCOORD1; //第二层UV
+        float4 tangent : TANGENT;//切线方向 All meshes have either calculated or imported tangents.
+        fixed4 color : COLOR; //顶点颜色
+};
+
+//使用一个结构体来定义顶点着色器的输出
+struct v2f 
+{
+    float4 pos : SV_POSITION;//	The position of the vertex after being transformed into projection space.
+    fixed4 color : COLOR0;//Vertex color, interpolated across the triangle. This value could correspond to anything depending on how the fragment shader interprets it.
+    fixed4 spec	: COLOR1;
+    float3 : NORMAL; //The normal of the vertex after being transformed into view space.
+    float2 uv0	: TEXCOORD0;
+    float2 uv1	: TEXCOORD1;
+    float2 uv2	: TEXCOORD2;
+    fixed4 screenPos	: TEXCOORD4;
+};
+
+
+函数和常量:
+
+https://docs.unity3d.com/Manual/SL-BuiltinFunctions.html
+
+float4 UnityObjectToClipPos(float3 pos)
+Transforms a point from object space to the camera’s clip space in homogeneous coordinates. This is the equivalent of mul(UNITY_MATRIX_MVP, float4(pos, 1.0)), and should be used in its place.
+
+// Tranforms position from world to homogenous space
+inline float4 UnityWorldToClipPos( in float3 pos )
+{
+    return mul(UNITY_MATRIX_VP, float4(pos, 1.0));
+}
+
+// Tranforms position from view to homogenous space
+inline float4 UnityViewToClipPos( in float3 pos )
+{
+    return mul(UNITY_MATRIX_P, float4(pos, 1.0));
+}
+
+float3 UnityObjectToViewPos(float3 pos)
+Transforms a point from object space to view space. This is the equivalent of mul(UNITY_MATRIX_MV, float4(pos, 1.0)).xyz, and should be used in its place.
+// Tranforms position from object to camera space
+inline float3 UnityObjectToViewPos( in float3 pos )
+{
+    return mul(UNITY_MATRIX_V, mul(unity_ObjectToWorld, float4(pos, 1.0))).xyz;
+}
+
+
+// Tranforms position from world to camera space
+inline float3 UnityWorldToViewPos( in float3 pos )
+{
+    return mul(UNITY_MATRIX_V, float4(pos, 1.0)).xyz;
+}
+
+
+float3 WorldSpaceViewDir (float4 v)	
+Returns world space direction (not normalized) from given object space vertex position towards the camera.
+输入一个模型空间中的顶点位置，返回世界空间中从该点到摄像机的观察方向。
+
+// Computes world space view direction, from object space position
+// *Legacy* Please use UnityWorldSpaceViewDir instead
+inline float3 WorldSpaceViewDir( in float4 localPos )
+{
+    float3 worldPos = mul(unity_ObjectToWorld, localPos).xyz;
+    return UnityWorldSpaceViewDir(worldPos);
+}
+
+// Computes world space view direction, from object space position
+inline float3 UnityWorldSpaceViewDir( in float3 worldPos )
+{
+    return _WorldSpaceCameraPos.xyz - worldPos;
+}
+
+float3 ObjSpaceViewDir (float4 v)	
+Returns object space direction (not normalized) from given object space vertex position towards the camera.
+输入一个模型空间中的顶点位置，返回模型空间中从该点到摄像机的观察方向。
+
+// Computes object space view direction
+inline float3 ObjSpaceViewDir( in float4 v )
+{
+    float3 objSpaceCameraPos = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos.xyz, 1)).xyz;
+    return objSpaceCameraPos - v.xyz;
+}
+
+float3 WorldSpaceLightDir (float4 v)	
+Computes world space direction (not normalized) to light, given object space vertex position.
+计算world空间光照方向，从顶点位置到光源位置，not normalized。
+// Computes world space light direction, from world space position
+inline float3 UnityWorldSpaceLightDir( in float3 worldPos )
+{
+    #ifndef USING_LIGHT_MULTI_COMPILE
+        return _WorldSpaceLightPos0.xyz - worldPos * _WorldSpaceLightPos0.w;
+    #else
+        #ifndef USING_DIRECTIONAL_LIGHT
+        return _WorldSpaceLightPos0.xyz - worldPos;
+        #else
+        return _WorldSpaceLightPos0.xyz;
+        #endif
+    #endif
+}
+
+// Computes world space light direction, from object space position
+// *Legacy* Please use UnityWorldSpaceLightDir instead
+inline float3 WorldSpaceLightDir( in float4 localPos )
+{
+    float3 worldPos = mul(unity_ObjectToWorld, localPos).xyz;
+    return UnityWorldSpaceLightDir(worldPos);
+}
+
+float3 ObjSpaceLightDir (float4 v)
+Computes object space direction (not normalized) to light, given object space vertex position.
+计算object空间光照方向，从顶点位置到光源位置，not normalized。
+
+// Computes object space light direction
+inline float3 ObjSpaceLightDir( in float4 v )
+{
+    float3 objSpaceLightPos = mul(unity_WorldToObject, _WorldSpaceLightPos0).xyz;
+    #ifndef USING_LIGHT_MULTI_COMPILE
+        return objSpaceLightPos.xyz - v.xyz * _WorldSpaceLightPos0.w;
+    #else
+        #ifndef USING_DIRECTIONAL_LIGHT
+        return objSpaceLightPos.xyz - v.xyz;
+        #else
+        return objSpaceLightPos.xyz;
+        #endif
+    #endif
+}
+
+float4 ComputeScreenPos (float4 clipPos)	
+Computes texture coordinate for doing a screenspace-mapped texture sample. Input is clip space position.
+
+float4 ComputeGrabScreenPos (float4 clipPos)	
+Computes texture coordinate for sampling a GrabPass texure. Input is clip space position.
+
+float3 UnityObjectToWorldNormal(float3 norm)   
+把法线方向从模型空间转换到世界空间中。
+// Transforms normal from object to world space
+inline float3 UnityObjectToWorldNormal( in float3 norm )
+{
+#ifdef UNITY_ASSUME_UNIFORM_SCALING
+    return UnityObjectToWorldDir(norm);
+#else
+    // mul(IT_M, norm) => mul(norm, I_M) => {dot(norm, I_M.col0), dot(norm, I_M.col1), dot(norm, I_M.col2)}
+    return normalize(mul(norm, (float3x3)unity_WorldToObject));
+#endif
+}
+
+
+float3 UnityObjectToWorldDir(flaot3 dir)    
+把方向矢量从模型空间变换到世界空间中。
+// Transforms direction from object to world space
+inline float3 UnityObjectToWorldDir( in float3 dir )
+{
+    return normalize(mul((float3x3)unity_ObjectToWorld, dir));
+}
+
+float3 UnityWorldToObjectDir(float dir) 
+把方向矢量从世界空间变换到模型空间中。
+// Transforms direction from world to object space
+inline float3 UnityWorldToObjectDir( in float3 dir )
+{
+    return normalize(mul((float3x3)unity_WorldToObject, dir));
+}
+
+
+
+https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html
+
+UNITY_MATRIX_MVP	Current model * view * projection matrix. mul(UNITY_MATRIX_VP, UNITY_MATRIX_M)
+UNITY_MATRIX_MV	Current model * view matrix. mul(UNITY_MATRIX_V, UNITY_MATRIX_M)
+UNITY_MATRIX_V	Current view matrix. unity_MatrixV
+UNITY_MATRIX_P	Current projection matrix. OptimizeProjectionMatrix(glstate_matrix_projection)
+UNITY_MATRIX_VP	Current view * projection matrix. unity_MatrixVP
+UNITY_MATRIX_T_MV	Transpose of model * view matrix. transpose(UNITY_MATRIX_MV)
+UNITY_MATRIX_IT_MV	Inverse transpose of model * view matrix.  transpose(mul(UNITY_MATRIX_I_M, UNITY_MATRIX_I_V))
+unity_ObjectToWorld	Current model matrix.  UNITY_MATRIX_M
+unity_WorldToObject	Inverse of current world matrix. UNITY_MATRIX_I_M
+
+_WorldSpaceCameraPos	float3	World space position of the camera.
+_ProjectionParams	float4	x is 1.0 (or –1.0 if currently rendering with a flipped projection matrix), y is the camera’s near plane, z is the camera’s far plane and w is 1/FarPlane.
+_ScreenParams	float4	x is the width of the camera’s target texture in pixels
+, y is the height of the camera’s target texture in pixels, z is 1.0 + 1.0/width and w is 1.0 + 1.0/height.
+_ZBufferParams	float4	Used to linearize Z buffer values. x is (1-far/near), y is (far/near), z is (x/far) and w is (y/far).
+unity_OrthoParams	float4	x is orthographic camera’s width, y is orthographic camera’s height, z is unused and w is 1.0 when camera is orthographic, 0.0 when perspective.
+unity_CameraProjection	float4x4	Camera’s projection matrix.
+unity_CameraInvProjection	float4x4	Inverse of camera’s projection matrix.
+unity_CameraWorldClipPlanes[6]	float4	Camera frustum plane world space equations, in this order: left, right, bottom, top, near, far.
+
+
+_Time	float4	Time since level load (t/20, t, t*2, t*3), use to animate things inside the shaders.
+_SinTime	float4	Sine of time: (t/8, t/4, t/2, t).
+_CosTime	float4	Cosine of time: (t/8, t/4, t/2, t).
+unity_DeltaTime	float4	Delta time: (dt, 1/dt, smoothDt, 1/smoothDt).
+
+
+计算:
+
+v2f vert (a2v v)
+{
+    v2f o;
+    o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+
+    o.vertex = UnityObjectToClipPos(v.vertex); // move model's vertices to screen position 
+
+    o.posWorld  = mul(unity_ObjectToWorld, v.vertex); // get vertex's world position 
+    float3 WorldSpacePosition = mul(UNITY_MATRIX_M,v.vertex);
+   
+
+    o.viewDir = normalize(UnityWorldSpaceViewDir(o.posWorld));
+    float3 viewNormal   = mul((float3x3)UNITY_MATRIX_MV, v.normal);
+    float4 viewPos      = mul(UNITY_MATRIX_MV, v.vertex);
+    
+
+    o.screenPos = ComputeScreenPos(o.vertex);
+    o.scrPos = ComputeGrabScreenPos(o.vertex); // 抓取屏幕图像的采样坐标
+
+    //float3 normal = normalize(mul((float3x3)unity_ObjectToWorld, v.normal));
+    //float3 tangent = normalize(mul((float3x3)unity_ObjectToWorld, v.tangent.xyz));
+    //float3 binormal = normalize(cross(normal, tangent) * v.tangent.w);
+
+    //float3 WorldSpaceTangent = mul((float3x3)UNITY_MATRIX_M,v.tangent.xyz);
+    //float3 WorldSpaceNormal = mul(v.normal,(float3x3)UNITY_MATRIX_I_M);
+    //float3 WorldSpaceBiTangent = normalize(cross(WorldSpaceNormal, WorldSpaceTangent.xyz) * v.tangent.w);
+
+    // float3 WorldSpaceViewDirection = SafeNormalize(_WorldSpaceCameraPos.xyz - mul(GetObjectToWorldMatrix(), float4(v.vertex.xyz, 1.0)).xyz);
+
+    //float3 normalDir = UnityObjectToWorldNormal(v.normal); // get world mormal
+    //float3 tangentDir = normalize( mul( unity_ObjectToWorld, float4( v.tangent.xyz, 0.0 ) ).xyz );
+    //float3 bitangentDir = normalize(cross(normalDir, tangentDir) * v.tangent.w);
+
+
+
+    float3 worldRefl = reflect(-UnityWorldSpaceViewDir(o.posWorld), UnityObjectToWorldNormal(v.normal));
+
+    return o;
+}
+
+
+float4 frag(v2f i) : COLOR
+{
+    i.normalDir = normalize(i.normalDir);
+    float3x3 tangentTransform = float3x3( i.tangentDir, i.bitangentDir, i.normalDir);
+
+    //float3 viewDirection = UnityWorldSpaceViewDir(mul(unity_ObjectToWorld,v.vertex))
+    //float3 viewDirection = normalize(_WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld,v.vertex).xyz);
+    float3 viewDirection = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
+
+    float3 _Normal_var = UnpackNormal(tex2D(_Normal,TRANSFORM_TEX(i.uv0, _Normal)));
+    float3 normalLocal = _Normal_var.rgb;
+    float3 normalDirection = normalize(mul( normalLocal, tangentTransform )); // Perturbed normals
+    float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz);
+    float3 lightColor = _LightColor0.rgb;
+
+    float NdotL = max(0.0,dot( normalDirection, lightDirection ));
+    float3 directDiffuse = max( 0.0, NdotL) * attenColor;
+
+}
