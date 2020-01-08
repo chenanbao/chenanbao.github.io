@@ -1,0 +1,120 @@
+float2 _gradientSpeed;
+float _gradientScale;
+float2 _gradientMinMax;
+float _forthFlatness;
+
+float _smallWaveSpeed;
+float _smallWaveRotateX;
+float _smallWaveRotateZ;
+float _smallWaveScale;
+float _smallWaveHeight;
+float _smallWavePower;
+
+float _mediumWaveSpeed;
+float _mediumWaveRotateX;
+float _mediumWaveRotateZ;
+float _mediumWaveScale;
+float _mediumWaveHeight;
+float _mediumWavePower;
+
+float _bigWaveSpeed;
+float _bigWaveRotateX;
+float _bigWaveRotateZ;
+float _bigWaveScale;
+float _bigWaveHeight;
+float _bigWavePower;
+
+float2 unity_gradientNoise_dir(float2 p)
+{
+    // Permutation and hashing used in webgl-nosie goo.gl/pX7HtC
+    p = p % 289;
+    float x = (34 * p.x + 1) * p.x % 289 + p.y;
+    x = (34 * x + 1) * x % 289;
+    x = frac(x / 41) * 2 - 1;
+    return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
+}
+
+float unity_gradientNoise(float2 p)
+{
+    float2 ip = floor(p);
+    float2 fp = frac(p);
+    float d00 = dot(unity_gradientNoise_dir(ip), fp);
+    float d01 = dot(unity_gradientNoise_dir(ip + float2(0, 1)), fp - float2(0, 1));
+    float d10 = dot(unity_gradientNoise_dir(ip + float2(1, 0)), fp - float2(1, 0));
+    float d11 = dot(unity_gradientNoise_dir(ip + float2(1, 1)), fp - float2(1, 1));
+    fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
+    return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x);
+}
+
+float Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax)
+{
+    return OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
+}
+
+float makeNoise(float3 WorldSpacePosition,float2 speed,float scale)
+{
+    float2 uv = float2(WorldSpacePosition.x,WorldSpacePosition.z);
+    float2 offset = _gradientSpeed * speed *_Time.y;
+    float2 tilingAndOffset = uv * float2(1,1) + offset;
+    float nosie =  unity_gradientNoise(tilingAndOffset * _gradientScale * scale) + 0.5;
+    return nosie;
+}
+
+
+float makeWave(float3 WorldSpacePosition,float speed,float nosie,float rotatex,float rotatez,float scale,float height,float power)
+{
+    float waveSpeed = speed * _Time.y  +  nosie;
+    float wave = waveSpeed + (WorldSpacePosition.x*rotatex + WorldSpacePosition.z*rotatez)*scale;
+    wave = pow(1 - abs(sin(wave)),power) * height;
+    return wave;
+}
+
+
+
+float3 WorldSpacePosition = mul(unity_ObjectToWorld,v.vertex);
+float3 ObjectSpacePosition = mul(unity_WorldToObject,float4(WorldSpacePosition,1.0));
+float _t =  v.color.x;
+
+_gradientSpeed = float2(0.2,0.2);
+_gradientScale = 0.5;
+_gradientMinMax = float2(0.5,1);
+_forthFlatness = 1;
+
+_smallWaveSpeed = 1.9;
+_smallWaveRotateX = 0.76;
+_smallWaveRotateZ = 1;
+_smallWaveScale = 5.65;
+_smallWaveHeight = 0.133;
+_smallWavePower = 1;
+
+_mediumWaveSpeed = 2.12;
+_mediumWaveRotateX = 1;
+_mediumWaveRotateZ = 0.63;
+_mediumWaveScale = 2.6;
+_mediumWaveHeight = 0.1;
+_mediumWavePower = 1.67;
+
+_bigWaveSpeed = 0.9;
+_bigWaveRotateX = 0.37;
+_bigWaveRotateZ = 0.77;
+_bigWaveScale = 1;
+_bigWaveHeight = 0.3;
+_bigWavePower = 0.97;
+
+float smallWave = makeWave(WorldSpacePosition,_smallWaveSpeed,1,_smallWaveRotateX,_smallWaveRotateZ,_smallWaveScale,_smallWaveHeight,_smallWavePower);
+float mediumWave = makeWave(WorldSpacePosition,_mediumWaveSpeed, makeNoise(WorldSpacePosition, float2(0.8, 0.8), 1.2),_mediumWaveRotateX,_mediumWaveRotateZ,_mediumWaveScale,_mediumWaveHeight,_mediumWavePower);
+float bigWave = makeWave(WorldSpacePosition,_bigWaveSpeed,makeNoise(WorldSpacePosition,float2(1,1),1),_bigWaveRotateX,_bigWaveRotateZ,_bigWaveScale,_bigWaveHeight,_bigWavePower);
+float nosieRemap = Unity_Remap_float(makeNoise(WorldSpacePosition,float2(1,1),1),float2(0,1),_gradientMinMax);
+float wave = (smallWave + mediumWave + bigWave) * nosieRemap;
+float3 pos = lerp(v.vertex ,float3(v.vertex.x ,v.vertex.y + (wave + wave),v.vertex.z),_t);
+v.vertex.xyz = lerp(pos,v.vertex,_t * _forthFlatness);
+
+float _mediumWaveColorBlend = 0.56;
+float2 wave2 = (mediumWave * _mediumWaveColorBlend + bigWave)* nosieRemap;
+
+float nosieRemap2;
+Unity_Remap_float(wave2,float2(0,_mediumWaveSpeed + _bigWaveSpeed + 1),float(0,1),nosieRemap2);
+
+float _TopColorContrast;
+
+
