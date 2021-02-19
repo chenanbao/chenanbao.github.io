@@ -63,6 +63,7 @@
 ##### com.unity.render-pipelines.universal
 
 Core.hlsl
+
 |名称	|说明|
 | ------ | ------ |
 |GetVertexPositionInputs(float3 positionOS)	|获取输入顶点坐标信息|
