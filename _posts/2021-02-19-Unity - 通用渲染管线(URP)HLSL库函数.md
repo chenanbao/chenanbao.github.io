@@ -10,9 +10,9 @@
      - Unity
 ---
 
-#####HLSL语义
+##### HLSL语义
 
-######顶点着色器（Vertex Shader）语义
+###### 顶点着色器（Vertex Shader）语义
 
 |输入	|描述	|类型|
 | ------ | ------ | ------ |
@@ -37,7 +37,7 @@
 |TEXCOORD[n]	|纹理坐标|	float4|
 
 
-######像素着色器（Pixel Shader）语义
+###### 像素着色器（Pixel Shader）语义
 
 |输入	|描述	|类型|
 | ------ | ------ | ------ |
@@ -51,7 +51,7 @@
 |COLOR[n]	|输出颜色|	float4|
 |DEPTH[n]	|输出深度|	float|
 
-######语义变化
+###### 语义变化
 
 |Direct3D 10语义 |	Direct3D 9等价语义 |
 | ------ | ------ |
@@ -60,7 +60,7 @@
 |SV_Target|	COLOR|
 
 
-#####com.unity.render-pipelines.universal
+##### com.unity.render-pipelines.universal
 
 Core.hlsl
 |名称	|说明|
@@ -78,6 +78,7 @@ Core.hlsl
 |(half3)MixFog(real3 fragColor, real fogFactor)	|混合雾|
 
 Lighting.hlsl
+
 |名称	|说明|
 | ------ | ------ |
 |DistanceAttenuation(float distanceSqr, half2 distanceAttenuation)	|距离衰减|
@@ -102,6 +103,7 @@ Lighting.hlsl
 |LightweightFragmentBlinnPhong(InputData inputData, half3 diffuse, half4 specularGloss, half smoothness, half3 emission, half alpha)	|轻量级片元布林·冯|
 
 Shadows.hlsl
+
 |名称	|说明|
 | ------ | ------ |
 |GetMainLightShadowStrength()	|获取主光源阴影强度|
@@ -114,7 +116,7 @@ Shadows.hlsl
 |GetShadowCoord(VertexPositionInputs vertexInput)	|获取阴影坐标信息|
 |ApplyShadowBias(float3 positionWS, float3 normalWS, float3 lightDirection)	|应用阴影偏移|
 
-#####com.unity.render-pipelines.core
+##### com.unity.render-pipelines.core
 
 SpaceTransforms.hlsl
 变换矩阵：
@@ -139,5 +141,6 @@ SpaceTransforms.hlsl
 
 
 
-#####参考
+##### 参考
+
 [HLSL官方手册](https://docs.microsoft.com/zh-cn/windows/win32/direct3dhlsl/dx-graphics-hlsl-reference?redirectedfrom=MSDN)
