@@ -145,7 +145,7 @@ Shader "Unlit/Sea"
 }
 ```
 
-Unity海水效果
+##### Unity海水复刻渲染效果
  ![image](/img/water/wave.gif)
 
 ##### Waterx.fsh
