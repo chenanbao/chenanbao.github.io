@@ -1,0 +1,69 @@
+cook资产报错
+Source package: /Game/OceanContent/Maps/VerifyMaps/BF_StageRL
+	Target package: /Game/Baatle_Rail/WaveCtrl/FishSpawners/BP_Fish_SpawnerNew
+	Referenced object: /Game/Baatle_Rail/WaveCtrl/FishSpawners/BP_Fish_SpawnerNew.BP_Fish_SpawnerNew_C:ICH-DefaultSceneRoot_GEN_VARIABLE
+LogCook: Error: Content is missing from cook. Source package referenced an object in target package but the object was stripped out of the target package when saved.
+
+找到这个帖子https://forums.unrealengine.com/t/logcook-error-content-is-missing-from-cook-source-package-referenced-an-object-in-target-package-but-the-target-package-was-marked-nevercook-or-is-not-cookable-for-the-target-platform/1825570/34
+1.通过重定向修复。无用
+2.验证资产和依赖，修复错误。无用
+3.可以通过修改DefaultEditor.ini把这个Error改为Warning，让包能打出来
+[CookSettings]
+CookContentMissingSeverity=Warning 
+
+启动游戏会提示类似如下错误，造成部分逻辑错误，比如战斗中鱼群位置全部错误，主要是ActorComponent的。
+[2025.01.17-06.54.08:354][393]LogStreaming: Error: CreateExport: /Game/OceanContent/Maps/VerifyMaps/BF_StageSG (0x4D9829143931F3ED) /Game/OceanContent/Maps/VerifyMaps/BF_StageSG (0x4D9829143931F3ED) - Could not find template object for AC_CharacterBuffContainer
+[2025.01.17-06.54.08:354][393]LogStreaming: Warning: Missing Dependency, missing package import 0x480000000D for package /Game/OceanContent/Maps/VerifyMaps/BF_StageSG
+
+2025.01.17-06.54.08:325][393]LogStreaming: Warning: Missing Dependency, missing package import 0x1900000054 for package /Game/Baatle_Rail/WaveCtrl/WaveTypes/BP_SequenceWave_TDGuide
+[2025.01.17-06.54.08:325][393]LogStreaming: Error: CreateExport: /Game/Baatle_Rail/WaveCtrl/WaveTypes/BP_SequenceWave_TDGuide (0xE23328BC4FD4F30D) /Game/Baatle_Rail/WaveCtrl/WaveTypes/BP_SequenceWave_TDGuide (0xE23328BC4FD4F30D) - Could not find template object for ICH-DefaultSceneRoot_GEN_VARIABLE
+
+想在官方的源码里看看最近有没有类似问题修改，找到如下二个修改，完美解决。
+https://github.com/EpicGames/UnrealEngine/commit/4aaee8503b8237f568a44e6e2130176ae045684e
+InvalidateExport component templates that are deemed unnecessary, this prevents the linker from recreating them when they are imported
+Fixed underlying cause of "Content is missing from cook" error when cooking deep blueprint hierarchies with components
+
+
+https://github.com/EpicGames/UnrealEngine/commit/05918d7e5c08cff86829867cc550a96e6d1fed64
+InvalidateExport: When an export is invalidated, also invalidate all of its subobjects. This fixes some remaining "Content is missing from cook" errors when cooking deep blueprint hierarchies with components, when the component that is found to be unnecessary has child components.
+
+
+启动游戏直接报错退出
+WARNING: POTENTIAL DATA LOSS! Universal Object Reference FragmentType Actor! This reference will be lost if re-saved.
+给出的信息有限，修改引擎源码 bool FUniversalObjectLocatorFragment::Serialize(FArchive& Ar) 打印Ar的名称，定位是所有LevelSequence的问题，发现大多数有红色的Track，以为是修复次问题可解决。删除所有Ls，可以启动游戏。
+想修复爆红LS，还是奔溃，发现实际无红Track也会启动奔溃。
+
+最后没办法阅读源码，在启动游戏时LaunchEngineLoop.cpp 的PreInitPostStartupScreen方法中， ProcessNewlyLoadedUObjects()里所有LS会收集一些Type信息需要处理，但实际在后面的FDelayedAutoRegisterHelper::RunAndClearDelayedAutoRegisterDelegates(EDelayedRegisterRunPhase::ObjectSystemReady);
+才完成Type信息的注册。
+最后在保证预先处理一次Type，
+static bool bReisgerObjectSystemReady = false;
+bool FUniversalObjectLocatorFragment::Serialize(FArchive& Ar)
+{
+			if (bReisgerObjectSystemReady == false)
+			{
+				bReisgerObjectSystemReady = true;
+				FDelayedAutoRegisterHelper::RunAndClearDelayedAutoRegisterDelegates(EDelayedRegisterRunPhase::ObjectSystemReady);
+			}
+			
+			// Find the FragmentType
+			const FFragmentType* SerializedFragmentType = FRegistry::Get().FindFragmentType(FragmentTypeID);
+}
+
+修改这个方法，保证不会断言且执行一次。
+void FDelayedAutoRegisterHelper::RunAndClearDelayedAutoRegisterDelegates(EDelayedRegisterRunPhase Phase)
+{
+	UE_LOG(LogTemp,Log,TEXT("RunAndClearDelayedAutoRegisterDelegates EDelayedRegisterRunPhase:%d"), Phase);
+	//checkf(!GPhasesAlreadyRun.Contains(Phase), TEXT("Delayed Startup phase %d has already run - it is not expected to be run again!"), (int32)Phase);
+
+	if (!GPhasesAlreadyRun.Contains(Phase)) 
+	{
+		// run all the delayed functions!
+		GetDelayedAutoRegisterDelegate(Phase).Broadcast();
+		GetDelayedAutoRegisterDelegate(Phase).Clear();
+
+		GPhasesAlreadyRun.Add(Phase);
+	}
+}
+
+此次修改发在Unreal论坛里了，见JenniferAndBob回复。
+https://forums.unrealengine.com/t/crash-in-universalobjectlocatorfragment-in-5-4-2-only-in-windows-build/1892775/4
