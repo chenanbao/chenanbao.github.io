@@ -23,6 +23,15 @@ GameMode深度适配FPS
 2D游戏及界面类游戏
 奔溃
 
+Forward
+For each light:
+    For each object affected by the light: 
+        framebuffer += object * light
+前向渲染支持半透明渲染。光源数量对计算复杂度影响巨大,着色成本高，尤其在复杂场景中容易造成过绘制（Overdraw）。
+适合低端设备 如移动平台游戏
+一般会让每个物体受影响的光源有个上限比如3个或者4个
+对需要深度和法线的后期处理算法不友好
+
 Deferred
 For each object:
     Render to multiple targets 
@@ -30,13 +39,7 @@ For each light:
     Apply light as a 2D postProcess
 延迟渲染难处理透明的，对MSAA支持不友好。对大量光照支持好。每个像素只计算一次光照,仅与屏幕分辨率相关
 G-Buffer占用大量显存，对带宽和硬件要求较高。
-
-Forward
-For each light:
-    For each object affected by the light: 
-        framebuffer += object * light
-前向渲染支持半透明渲染。光源数量对计算复杂度影响巨大,着色成本高，尤其在复杂场景中容易造成过绘制（Overdraw）。适合低端设备 如移动平台游戏
-
+对需要深度和法线的后期处理算法友好
 
 Forward+
 foreach object in sceen
@@ -48,7 +51,12 @@ foreach tile in screen:
 foreach pixel in screen:
     foreach light in light_list_of_this_tile:
         pixelLighting += light_contribution_to_pixel(light,pixel)
+从AMD的论文Forward+: Bringing Deferred Lighting to the Next Level开始流行起来的
+支持MSAA和透明，带宽小支持多光源
 
+群组渲染（Clustered Rendering）
+Clustered Forward Rendering ：在Forward+ Rendering的基础上又沿着相机深度的方向切了很多片
+Clustered Deferred Rendering也即是在Tiled Deferred Rendering的基础上又沿着相机深度的方向上进行了切片
 
 
 光照：
