@@ -202,6 +202,7 @@ GAMES201：高级物理引擎实战指南2020
  虎书 Fundamentals of Computer Graphics. Shirley
 OpenGL programming Guide
 实时渲染深入探究：https://dev.epicgames.com/community/learning/courses/ML7/unreal-engine-08227c/bLyn/unreal-engine-822b4d
+SIGGRAPH：https://kesen.realtimerendering.com/
 
 
 蒙特卡洛积分(Monte Carlo Integration)  对函数值进行多次采样求均值作为积分值的近似
