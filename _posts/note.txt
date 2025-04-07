@@ -217,6 +217,16 @@ ARM Mali Bifrost 的多线程性能和 ASTC 纹理压缩。
 Qualcomm Adreno 的驱动优化和硬件光追支持。
 Imagination 的 DXT 架构增强了光线追踪，适用于主流设备。
 
+
+脚本
+https://angelscript.hazelight.se/
+https://github.com/Tencent/puerts
+https://github.com/Tencent/UnLua
+
+
+
+
+
 UE游戏：
 《和平精英》《战双帕弥什》《鸿图之下》《全民奇迹2》《实况足球》《黑神话》《鸣潮》《幻塔》 《霍格沃茨之遗》《三角洲》
 
