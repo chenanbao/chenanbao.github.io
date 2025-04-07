@@ -1,0 +1,258 @@
+基本概念：
+
+高显存高级别显卡，高容量SSD，多核CPU 缺一不可
+
+编译引擎约需要约500G不到的空间
+
+由程序使用C++来开发核心的框架逻辑，并暴露一些参数及接口，策划创建由C++类继承的Blueprint，进行简单的参数配置或业务逻辑扩展，实现设计目标。通过这样的方式策划不需要会C++也能够从程序员的工作获利，并且在有微小改动的时候可以自行解决而不需要回头找程序修改底层代码。
+Blueprint可以实现大部分C++的功能，甚至小型游戏可以完全通过Blueprint来实现，但对于大中型的游戏是不建议这样做的。
+
+版本升级很快，有些插件只能特定版本和平台使用，需要调整适配API
+
+GameMode深度适配FPS
+
+没有专业的引擎和专业的gameplay程序出来的产品是可以玩，但是基本都是在5-6分阶段，专业引擎和专业gameplay的程序存在的意义是把5-6分阶段的产品打磨到8-9分，5-6分的产品可能花费30-40%的精力就行了，8-9分的打磨却要花费60-70%的精力
+
+性能/画质/功能特性不可能都要，找到平衡
+
+
+
+Deferred
+For each object:
+    Render to multiple targets 
+For each light:
+    Apply light as a 2D postProcess
+延迟渲染难处理透明的，对MSAA支持不友好。对大量光照支持好。每个像素只计算一次光照,仅与屏幕分辨率相关
+G-Buffer占用大量显存，对带宽和硬件要求较高。
+
+Forward
+For each light:
+    For each object affected by the light: 
+        framebuffer += object * light
+前向渲染支持半透明渲染。光源数量对计算复杂度影响巨大,着色成本高，尤其在复杂场景中容易造成过绘制（Overdraw）。适合低端设备 如移动平台游戏
+
+
+Forward+
+foreach object in sceen
+        get depth
+foreach tile in screen:
+        get max min depth
+        Frustum  Intersection test
+        Generate a list of light 
+foreach pixel in screen:
+    foreach light in light_list_of_this_tile:
+        pixelLighting += light_contribution_to_pixel(light,pixel)
+
+
+
+光照：
+Lightmass （UE自己开发的）用于静态场景烘焙，Lumen 及 Nanite 处理动态光照。
+Lightmass 会生成 三种 主要数据：Lightmap：光照贴图 Shadowmap：阴影贴图 Volumetric Lightmap：体积光照贴图，使用三阶球谐采样来捕捉所有方向的光，用于将间接光照应用于动态物体的数据集称为“体积光照”
+
+光源移动性：
+Static：运行时无法移动光源 静态类型光源会将它的直接光照，间接光照以及阴影，完全烘焙到光照贴图中。不能产生高光。
+Stationary：保持固定位置不变的光源，运行游戏时可改变光源亮度颜色等，但不能移动光源位置。直接光照时延迟渲染的，可以运行时修改光源颜色和亮度。间接光照和间接阴影存储在光照贴图中，运行时不可改变。直接阴影在阴影贴图中，是距离场阴影。能产生高光。
+Movable：完全动态的光照和阴影，运行时可调整。动态光源不会生成间接光照。能产生高光。
+
+抗锯齿
+TAA Temporal Anti-Aliasing：跨帧采样的时间累积算法，渲染管线中实时采样，融合多帧数据重建图像 支持延迟渲染 移动过快 会导致重影
+FXAA Fast Approximate Anti-Aliasing：基于后处理的像素级模糊算法  渲染完成后全屏扫描 识别高对比度边缘进行平滑处理
+MSAA Multisample Anti-Aliasing：在光栅化阶段，判断一个三角形是否被像素覆盖的时候计算三角形对子像素的覆盖情况，但计算颜色时只用像素中心坐标计算一次颜色，然后将着色结果乘以coverage的比例 只支持前向渲染
+SSAA Super-Sample Anti-Aliasing:在渲染过程中对每个像素进行多次采样，然后对这些采样结果进行平均，以获得更平滑的边缘。SSAA的基本原理是提高渲染分辨率 ，然后将高分辨率图像缩小到目标分辨率。
+DLSS: 需要硬件支持
+Temporal Approximate Anti-Aliasing （TXAA）：TXAA是TAA和MSAA的结合，旨在利用两者的优势来提供更高质量的抗锯齿效果。它结合了TAA的时间采样和MSAA的空间采样。
+
+阴影：
+Shadow Map：渲染深度图，比较像素深度生成阴影。
+传统的shadowmap的方式有两个缺陷：1. 锯齿；2. 自遮挡
+Cascaded Shadow Maps：只能用于定向光源，如DirectionlLight。层级式阴影图，根据到摄像机的距离，将摄像机前面的空间分成多个层级，分别绘制各个层级的物体深度ShadowMap，合成一张连续的CSM阴影贴图，虚幻引擎的Far Shadow就是CSM中作为最后一层级渲染远处的阴影，距离可以很远。在Mobile管线上，默认需要先烘焙LightMap才能使用CSM Far Shadow
+Dynamic Inset Shadow： 是 Unreal Engine 中的一项功能，旨在提高动态物体的阴影质量，尤其是在距离光源较远时。这一功能通过为每个动态物体单独绘制高质量的阴影来弥补传统阴影投射的精度损失。具体来说，当启用 Dynamic Inset Shadow 后，引擎会根据物体的边界框计算一个合适的投影分辨率，并在一张 PerObjectShadowAtlas 上绘制该物体的深度信息。这种方法允许每个物体拥有一个高分辨率的阴影贴图，从而在动态场景中提供更加细腻的阴影效果
+Contact shadow：会 raymarching采样depthbuffer一段很小的距离，来补充shadowmap阴影效果。使用shadowmap阴影时，因为shadowmap需要覆盖足够大的范围，在近距离观察时，shadowmap的精度往往不够看，contact shadow是对近距离细节阴影的一个补充
+Capsule Shadows：胶囊体阴影非常简单同时损耗很低，是用来渲染模型下方阴影的系统。当有大量角色运动时，如果使用具体的静态网格几何体，也就是角色自身的几何体来计算下方阴影，这样就需要跟踪并计算许多几何体。使用碰撞胶囊体来投射阴影，因为它们的面数要低得多，更容易投下阴影
+Regular Dynamic shadows：动态阴影用于实时计算移动物体的阴影。
+PerObjectShadow（Stationary Light Shadows）：适用于场景静态光源下绘制动态物体阴影，由于静态平行光源下的静态物体均可在离线状态下烘焙阴影到 Lightmap（Shadow mask），此时若使用 CSM 渲染余下的少量动态物体将会造成 Shadowmap 的浪费。使用逐物件阴影解决方案会得到比较显著的 GPU 性能提升。
+Distance field shadows:Use DF info instead of tracing geometry
+Virtual Shadow Maps设计就是用来提高阴影分辨率的 配合lumen natie worldpartition使用
+阴影贴图光线追踪(Shadow Map Ray Tracing, SMRT):SMRT是UE5提出的结合VSM使用的阴影采样算法，用于替代传统阴影渲染中的PCF(Percentage Closer Filtering)/PCSS(Percentage Closer Soft Shadow)
+SSAO：Screen Space Ambient Occasion屏幕空间环境遮挡，默认开启，动态ao，在PostProcessVolume里做调整，有Intensity和Radius两个属性。通过在屏幕像素的位置布置随机个采样点，然后通过采样点遮蔽项所占的百分比来计算阴影遮蔽强度。通常是在标准全局光照的基础上增添细微效果，例如让角落、裂缝或其他生物变暗，以形成一种更加自然真实的视觉效果。
+DFAO：Distance Field Ambient Occlusion距离场环境遮挡，适合做开阔大场景的ao，默认关闭，动态ao
+
+各向异性高光(Anisotropic highlighting)：高光天使环 Kajiya-Kay算法 是基于经验的着色模型，也就是并不是完全的着色物理正确。不过对于大多数硬件性能较低的平台也算够用
+Marschner(siggraph03) Marschner模型是除Kajiya-Kay模型外另一个应用广泛的头发着色模型
+Epic在Siggraph 2016 的Physically Based Hair Shading in Unreal发布了新一代的PBR毛发着色模型。将Marschner做了一些近似逼近，能realtime展现的比较好
+
+substrate：满足BSDF材质的创建流程
+Screen Space GI：屏幕空间全局照明(SSGI)是虚幻引擎的一项功能，旨在通过向屏幕视图内的对象添加动态间接光照来创建自然光照。利用SSGI，还可从自发光表面（例如霓虹灯或其他明亮表面）获得动态光照。目前，开启 SSGI 后将自动屏蔽 SSAO，与 SSGI 协同的 AO 无法通过面板进行调整（DFAO不受影响）
+
+剔除:
+Distance Culling/Frustum Culling/Precomputed Culling/Occlusion Culling
+hierarchical Z-based occlusion/Software Occlusion Culling
+
+Early-Z：是 GPU 硬件层面的优化技术，通过在片元着色器执行前提前进行深度测试，避免对被遮挡的像素进行无效计算 。顶点处理 → 光栅化 → Early-Z 深度测试 → 片元着色器 → 最终深度测试与混合
+Z-pre pass：Prepass 是一种通过两次渲染来优化 Early-Z 的方法。第一次仅写入深度，第二次关闭深度写入并进行颜色渲染
+
+
+减少DrawCall
+Merge Actors/Instanced StaticMesh Rendering/Level of Detail/Hierarchical LOD （传统 LOD 仅根据距离切换单个物体的细节（如一棵树从高模变低模），但无法区分同一距离下不同类型物体的重要性。）
+Lod一般每级降50%来抵消Mesh增加的消耗
+
+反射：
+Reflection Captures 本质上是捕获一张360度的图片，将它混合在模型上
+Planar Reflections 平面反射是完全动态的，能显示场景中的任何改动。反射仅用于平滑表面，且在某些设置上可能损耗很大；但是非常适合需要精确反射效果的表面，也只在有限范围内起作用，适用于房间内的镜子而不是海面
+Scene Space Reflections  唯一默认激活的反射系统，不需要预先计算；能实时反射所有对象；很准确但是有噪点，并且损耗很大；只会反射当前可见的内容。此效果不适合移动端开发。由于此效果依赖于法线 G 缓冲区 (Normals G-Buffer)，因此仅在延迟渲染路径中可用
+
+Fog:
+DistanceFog /HeighFog
+
+
+命令：
+r.shadowquality 0 共有 0 到 5 六个等级，0 没有动态阴影，5 最高质量动态阴影。
+t.maxfps 调整最大帧率
+Freezerendering 查看当前裁剪后需要渲染的对象
+r.ForceLOD x 强制设置LOD级别
+
+Lafortune ：经验性的反射模型，它使用了基于统计学的方法来描述物体表面的反射特性。该模型可以灵活地控制反射的各向同性和各向异性，并且能够很好地拟合各种不同的反射数据。（BRDF）公式为
+Torrance-Sparrow ：一种基于微表面理论的反射模型 ，该模型能够很好地模拟金属等具有光泽表面的反射特性（BRDF）公式为
+Ward anistropy：Ward 各向异性模型是一种用于描述各向异性表面反射的模型，它考虑了表面在不同方向上的反射特性不同，适用于模拟拉丝金属、头发等具有明显纹理方向的物体表面
+Oren-Nayar：一种用于描述粗糙表面漫反射的模型，它考虑了表面微观结构对漫反射的影响，能够更真实地模拟粗糙表面的光照效果，如磨砂塑料、石头等
+Cook-Torrance BRDF推导
+函数D：法线分布函数(Normal Distribution Function)，其代表了所有微观角度下微小镜面法线的分布情况，粗糙表面法线分布相对均匀，光滑表面法线分布相对集中 (这种解释可能会有些抽象，后面会给出更加直观的物理上的解释)
+函数G：几何函数(Geometry Function)，描述了微平面自遮挡的属性。当一个平面相对比较粗糙的时候，平面表面上的微平面有可能挡住其他的微平面从而减少表面所反射的光线。
+函数F：菲涅尔方程(Fresnel Rquation)，描述了物体表面在不同入射光角度下反射光线所占的比率
+
+
+Phong光照模型
+I = Ia + Id * (N · L) + Is * (R · V)^shininess
+（Ia为环境光，Id为漫反射，Is为镜面反射，N为法线，L为光方向，R为反射方向，V为视线方向，shininess为高光锐度）
+Blinn-Phong光照模型
+I = Ia + Id * (N · L) + Is * (N · H)^shininess
+（H为半向量）
+
+
+DirectLighting
+	Specular：GGX Shading model
+	Diffuse：IES/LightFunction
+	Shadows：CSM/Dynamic shadows/Distance field shadows/Inset shadows/ PerObjectShadow/Contact shadows
+Indirect
+	Specular：Planar/Reflections Cap/SSR
+	Diffuse：Lightmaps/Indirect Lighting cache
+	Shadows：DFAO/SSAO/Capsule Shadows
+
+粒子系统
+Niagara：虚幻引擎的高级粒子系统工具，提供强大的粒子效果和模拟能力。
+Cascade：传统的粒子系统工具，虽然Niagara在新版本中逐渐取代了它，但它仍然被用于一些项目中。
+
+Nanite
+虚拟化几何体：Nanite 是虚幻引擎5中的几何体虚拟化技术，使得开发者可以使用非常高分辨率的模型而无需担心传统的多边形限制。它自动处理细节层次（LOD），确保在各种距离下都能保持高质量的视觉效果。
+
+Lumen
+全局光照和反射系统：Lumen 是虚幻引擎5中的实时全局光照和反射系统，提供高质量的光照效果，并且能动态响应环境的变化。它取代了之前的光照系统（如Lightmass），提升了实时渲染的效果和灵活性。
+
+MegaLights所采用的方案，基础是ReGir——通俗的说并不会每帧计算全部的灯光贡献，而是每次只采样总灯光数量中的很小一部分灯光来求解。然后通过帧间累积(或者加上空间复用）来逼近真实结果。
+
+UMovieSceneSkeletalAnimationSystem  ECS构架 用于大规模计算
+UMovieSceneSkeletalAnimationTrack 为动画序列轨道，轨道持有多个UMovieSceneSkeletalAnimationSection 片段，片段的FMovieSceneSkeletalAnimationParams Param字段持有动画序列数据UAnimSequenceBase
+只要Track上有动画序列，Param的bool bForceCustomMode强制设置为true，在UMovieSceneSkeletalAnimationSystem的SetAnimPosition函数中会设置为自定义模式：Params.SkeletalMeshComponent->SetAnimationMode(EAnimationMode::AnimationCustomMode);
+
+计算堆栈
+SetAnimPosition(SetAnimPositionParams);
+ApplyAnimations(SkeletalMeshComponent, InSkeletalAnimations.Animations);
+EvaluateSkeletalAnimations
+
+叠加动画融合
+FAnimNode_MultiWayBlend& BlendNode = (PlayerState->bAdditive) ? AdditiveBlendNode : FullBodyBlendNode;
+
+UAnimSequenceBase继承UAnimationAsset
+UAnimSequence继承UAnimSequenceBase
+UAnimMontage继承UAnimCompositeBase
+UAnimCompositeBase继承UAnimSequenceBase
+
+struct FAnimSequencerInstanceProxy : public FAnimInstanceProxy
+class UMovieSceneSkeletalAnimationSystem : public UMovieSceneEntitySystem
+struct FAnimSequencerInstanceProxy : public FAnimInstanceProxy
+
+
+TObjectPtr：当指向 UObject 类型，并且需要交给 UE 的垃圾回收系统管理时。常用于组件、Actor 等对象。 
+TSharedPtr：当多个对象需要共享数据时，用于管理非 UObject 的生命周期。 
+TWeakPtr：当需要避免循环引用，或访问但不控制对象的生命周期时。
+
+为了以后美术不装visualstudio编译代码，直接从编译好的环境启动工程。望大家按照下面流程提交c++修改。（仅供修改c++同学注意）
+1.如果修改了C++需提交Binaries目录，其下包含三种类型文件.modules/.dll/.pdb都提交，当然也包括c++代码。
+2.必须保持整个工程中所有.modules文件中buildid是一致的。否则将提示The following modules are missing or built with a different engine version
+3.不要提交Intermediate目录。
+
+
+困难模式：
+
+增量打包
+美术资源渲染效果适配移动端
+材质 渲染管线调整或扩展
+2D游戏及界面类游戏
+奔溃
+
+
+
+UE游戏
+《和平精英》《战双帕弥什》《鸿图之下》《全民奇迹2》《实况足球》《黑神话》《鸣潮》《幻塔》 《霍格沃茨之遗》《三角洲》
+
+
+
+Games101(现代计算机图形学入门）
+科大出品的数字几何处理-中国科学技术大学-傅孝明
+GAMES201：高级物理引擎实战指南2020
+ 虎书 Fundamentals of Computer Graphics. Shirley
+OpenGL programming Guide
+实时渲染深入探究：https://dev.epicgames.com/community/learning/courses/ML7/unreal-engine-08227c/bLyn/unreal-engine-822b4d
+
+
+蒙特卡洛积分(Monte Carlo Integration)  对函数值进行多次采样求均值作为积分值的近似
+
+
+
+IMR（立即渲染模式）每个渲染命令立即执行，直接写入帧缓冲 NVIDIA 早期 Tegra 系列 架构简单但带宽消耗高，移动端已被淘汰
+TBR（分块渲染） 将画面分割为 Tile，先缓存几何数据再统一渲染。ARM Mali Bifrost、高通 Adreno 部分型号。减少片外内存访问，带宽需求降低 50% 以上
+TBDR（分块延迟渲染）在 TBR 基础上增加 HSR（隐藏面消除），提前剔除不可见像素 Imagination PowerVR 系列 通过硬件加速深度测试，Overdraw 可控制在屏幕像素的 1.2 倍以内
+
+PowerVR 的 TBDR 架构在带宽节省上的优势，HSR 技术的剔除率。
+ARM Mali Bifrost 的多线程性能和 ASTC 纹理压缩。
+Qualcomm Adreno 的驱动优化和硬件光追支持。
+Imagination 的 DXT 架构增强了光线追踪，适用于主流设备。
+
+
+荒野大镖客2
+最后生还者1/2
+巫师3
+战神4/5
+神秘海域4
+底特律变人
+对马岛之魂
+黑神话
+极限竞速 地平线5
+地铁：离去
+古墓丽影
+GTA5
+ALANWAK1/2
+PlayDay2
+DeathStanding
+BioShock
+Borderlands3
+MaFIA
+WatchDog2
+生化危机4：重制版
+女神异闻录5
+血源
+剑星
+赛博朋克2077 
+刺客信条 幻境 奥德赛 英灵殿
+孤岛惊魂6
+蜘蛛侠
+碧蓝幻想 Relink
+只狼：影逝二度
+霍格沃茨之遗
+瘟疫传说1/2
+
+寂静岭2
+直到黎明
+博德之门
+艾尔登法环
+
