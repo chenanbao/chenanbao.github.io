@@ -139,12 +139,19 @@ Cook-Torrance BRDF推导
 Dot(点乘)：计算A,B之间的夹角映射到1到-1。当A,B的夹角等于90°时值为0;当夹角为0时值为1；
 Cross(叉乘)：计算同时垂直于A,B的向量；
 
+Lambert 总漫反射 = _反射系数 × 环境光ambient + _反射系数 × （顶点法向量N · 入射光反方向向量L)
+Half Lambert 漫反射 = _反射系数 × 环境光 + _反射系数 × （顶点法向量 · 入射光反方向向量 * 0.5 + 0.5） 可以用偏移因子来替代取半
+Phong 高光 =_镜面反射系数 × _光源强度 × （观察方向V · 反射光方向）^ 高光指数
+Blinn-Phong 高光 = _镜面反射系数 × _光源强度 × （法线方向N · 视点方向和光源方向的半角向量V+L）^ 高光指数
+
 Phong光照模型
 I = Ia + Id * (N · L) + Is * (R · V)^shininess
 （Ia为环境光，Id为漫反射，Is为镜面反射，N为法线，L为光方向，R为反射方向，V为视线方向，shininess为高光锐度）
+
 Blinn-Phong光照模型
 I = Ia + Id * (N · L) + Is * (N · H)^shininess
 （H为半向量）
+
 
 
 DirectLighting
