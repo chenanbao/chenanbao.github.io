@@ -92,6 +92,7 @@ Virtual Shadow Maps设计就是用来提高阴影分辨率的 配合lumen natie 
 阴影贴图光线追踪(Shadow Map Ray Tracing, SMRT):SMRT是UE5提出的结合VSM使用的阴影采样算法，用于替代传统阴影渲染中的PCF(Percentage Closer Filtering)/PCSS(Percentage Closer Soft Shadow)
 SSAO：Screen Space Ambient Occasion屏幕空间环境遮挡，默认开启，动态ao，在PostProcessVolume里做调整，有Intensity和Radius两个属性。通过在屏幕像素的位置布置随机个采样点，然后通过采样点遮蔽项所占的百分比来计算阴影遮蔽强度。通常是在标准全局光照的基础上增添细微效果，例如让角落、裂缝或其他生物变暗，以形成一种更加自然真实的视觉效果。
 DFAO：Distance Field Ambient Occlusion距离场环境遮挡，适合做开阔大场景的ao，默认关闭，动态ao
+HBAO: Horizon Based Ambient Occlusion（基于水平环境光遮蔽）SSAO 通常只考虑屏幕空间中像素周围的局部深度信息来判断遮挡情况，而 HBAO 采用基于物理的算法，会对每个像素周围 360 度水平方向上的半球进行深度采样，能捕捉到屏幕外的遮挡物，从而更准确地模拟光线在场景中的传播和遮挡效果，减少了漏光和不自然的阴影现象，比如在一些有大面积遮挡物但不在屏幕中心的场景中，HBAO 能更好地表现出正确的阴影。
 
 各向异性高光(Anisotropic highlighting)：高光天使环 Kajiya-Kay算法 是基于经验的着色模型，也就是并不是完全的着色物理正确。不过对于大多数硬件性能较低的平台也算够用
 Marschner(siggraph03) Marschner模型是除Kajiya-Kay模型外另一个应用广泛的头发着色模型
@@ -207,12 +208,19 @@ TWeakPtr：当需要避免循环引用，或访问但不控制对象的生命周
 3.不要提交Intermediate目录。
 
 
+Camera Angles:
+Low-angle shot.  低角度拍摄
+High-angle shot 高角度镜头
+Eye-level shot 平视镜头
+Bird’s-eye view 鸟瞰视角 俯拍镜头
+Dutch angle 荷兰角。通常，摄影机与地面或地平线平行放置；然而，荷兰角，也称为斜拍或倾斜镜头，会将视角倾斜，使摄影机与地平线成斜角——此时图像呈对角线。荷兰角暗示着不稳定、危险、陌生和悬念。你经常会在恐怖片和悬疑片中看到它们，或者在人物经历生理或心理变化的场景中
+Over-the-shoulder. 过肩镜头。过肩镜头（OTS）是一种极为常见的镜头，用于拍摄两位演员的对话。距离摄像机最近的演员被称为前景演员，或舞台前方的演员；该演员背对摄像机（看不到他的脸），镜头中会包含他的肩膀。面向摄像机（也是镜头的主要主体）的演员被称为舞台后方演员，镜头中会出现一个中景或特写镜头。OTS镜头非常重要，因为它可以通过在一个镜头中将两个角色联系起来，从而建立他们之间的关系（包括身体和情感方面）。OTS镜头适用于双人对话场景；但务必确保拍摄双方（越过每个演员的肩膀）。当你从OTS演员A向演员B拍摄时，然后转身从OTS演员B向演员A拍摄时，这被称为反打镜头，
 
-
-
-
-
-
+标准的特写（close-up，CU）镜头包括被摄对象的头部和肩部 最早由导演格里菲斯等人创造，用来拍摄人像的面部，人体的某一局部，物品的某一细节
+七分身镜头（Cowboy Shot)，又称牛仔，来源于全盛时期的好莱坞西部片，镜头的画面一般涵盖从人的头顶直到膝盖的位置，也就是七分身，像极了西部片中对牛仔形象刻画，从头到配枪的腰身
+ExtremeCloseUp而大特写镜头（extreme close-up，ECU）则更紧，如只摄取眼睛或嘴唇等 Extreme Close Up Shot 特写 对人物主体的部分进行特写来填充画面，用于极端情绪的表达。而只针对于眼部的特写镜头有时候也被称为“Italian Shot”。。
+中景镜头（Medium Shoot），画框下边卡在膝盖左右部位或场景局部的画面称为中景画面，中景镜头所包容的景物比全景少，比特写多，环境处于次要地位，重点在于表现人物的上身动作，在影视作品中中景镜头的比重较大，因为镜头的叙事性较强。
+Full Shot 全景 画面中主体完整（从头到脚）的填充画面，一般用以表现运动和环境。
 
 
 Games101(现代计算机图形学入门）
@@ -244,7 +252,8 @@ https://github.com/Tencent/puerts
 https://github.com/Tencent/UnLua
 
 
-
+GameEngine
+https://github.com/ValveSoftware/source-sdk-2013
 
 
 UE游戏：
