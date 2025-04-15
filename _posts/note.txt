@@ -212,6 +212,22 @@ TWeakPtr：当需要避免循环引用，或访问但不控制对象的生命周
 2.必须保持整个工程中所有.modules文件中buildid是一致的。否则将提示The following modules are missing or built with a different engine version
 3.不要提交Intermediate目录。
 
+// Base class of reflection data objects.
+class UField : public UObject  
+// Base class for all UObject types that contain fields.
+class UStruct : public UField
+// An object class
+class UClass : public UStruct
+//Reflection data for a standalone structure declared in a header or as a user defined struct
+class UScriptStruct : public UStruct
+// Reflection data for a replicated or Kismet callable function.
+class UFunction : public UStruct
+// Function definition used by dynamic delegate declarations
+class UDelegateFunction : public UFunction
+// Reflection data for an enumeration.
+class UEnum : public UField
+//
+class UProperty : public UField
 
 Camera Angles:
 Low-angle shot.  低角度拍摄
