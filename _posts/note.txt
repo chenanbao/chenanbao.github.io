@@ -229,6 +229,13 @@ class UEnum : public UField
 //
 class UProperty : public UField
 
+class UObjectBase
+{
+friend struct Z_Construct_UClass_UObject_Statics
+}
+Z_Construct_UClass_UObject_Statics在LearnCode\Intermediate\Build\Win64\LearnCode\Inc\CoreUObject\UHT\NoExportTypes.gen.cpp
+
+
 Camera Angles:
 Low-angle shot.  低角度拍摄
 High-angle shot 高角度镜头
