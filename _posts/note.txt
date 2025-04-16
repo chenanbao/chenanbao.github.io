@@ -153,6 +153,7 @@ Blinn-Phong光照模型
 I = Ia + Id * (N · L) + Is * (N · H)^shininess
 （H为半向量）
 
+InteriorMapping 假室内效果
 
 
 DirectLighting
