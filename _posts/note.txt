@@ -268,6 +268,21 @@ Qualcomm Adreno 的驱动优化和硬件光追支持。
 Imagination 的 DXT 架构增强了光线追踪，适用于主流设备。
 
 
+Rider&Unreal HotKey
+
+
+Alt+O 切换h和cpp文件
+Alt+\ 搜索当前文件的函数
+Alt + Home 跳转到父类方法 
+Ctrl+Alt+Enter 格式化代码
+Shift + F12 查找当前光标下类型或变量被使用的地方
+Ctrl + E, H 打开当前光标下类型的继承关系面板
+Ctrl + Tab	切换打开的文件 	
+跳转到定义和实现 1.F12 2.按住Ctrl + 左键单击 3.中键单击
+搜索 Shift + Shift
+打开当前光标所在代码的上下文菜单：Alt + Enter
+
+
 脚本
 https://angelscript.hazelight.se/
 https://github.com/Tencent/puerts
