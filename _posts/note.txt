@@ -208,6 +208,10 @@ TObjectPtr：当指向 UObject 类型，并且需要交给 UE 的垃圾回收系
 TSharedPtr：当多个对象需要共享数据时，用于管理非 UObject 的生命周期。 
 TWeakPtr：当需要避免循环引用，或访问但不控制对象的生命周期时。
 
+RAII（Resource Acquisition Is Initialization）的核心思想 ：资源获取：在对象的构造函数中获取资源（文件句柄，网络链接等）；资源释放：在对象的析构函数中释放资源；通过此种方式避免资源泄露和未释放问题。
+
+智能指针：将基本类型指针封装为类对象指针（这个类肯定是个模板，以适应不同基本类型的需求），并在析构函数里编写delete语句删除指针指向的内存空间
+
 为了以后美术不装visualstudio编译代码，直接从编译好的环境启动工程。望大家按照下面流程提交c++修改。（仅供修改c++同学注意）
 1.如果修改了C++需提交Binaries目录，其下包含三种类型文件.modules/.dll/.pdb都提交，当然也包括c++代码。
 2.必须保持整个工程中所有.modules文件中buildid是一致的。否则将提示The following modules are missing or built with a different engine version
