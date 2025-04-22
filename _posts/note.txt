@@ -212,6 +212,14 @@ RAII（Resource Acquisition Is Initialization）的核心思想 ：资源获取�
 
 智能指针：将基本类型指针封装为类对象指针（这个类肯定是个模板，以适应不同基本类型的需求），并在析构函数里编写delete语句删除指针指向的内存空间
 
+Plain Old Data: C++定义的和C相兼容的数据结构 。没有构造函数，析构函数，复制赋值操作符，没有虚函数，虚基类。所有非静态成员都应该是public和pod类型。
+
+g++ 和 gcc：均属于 GNU Compiler Collection（GCC）套件。gcc 是 GCC 中用于编译 C 语言的编译器，g++ 则用于编译 C++ 语言。GCC 是开源编译器，可在多种操作系统上使用，如 Linux、macOS、Windows（通过 MinGW 或 Cygwin）等。
+clang：是 LLVM（Low Level Virtual Machine）项目的一部分，同样是开源编译器，支持多种平台，包括 Linux、macOS、Windows 等。在 macOS 上，它是默认的编译器。
+MSVC：即 Microsoft Visual C++，是微软开发的闭源编译器，主要用于 Windows 平台，是 Visual Studio 集成开发环境（IDE）的一部分。
+
+
+
 为了以后美术不装visualstudio编译代码，直接从编译好的环境启动工程。望大家按照下面流程提交c++修改。（仅供修改c++同学注意）
 1.如果修改了C++需提交Binaries目录，其下包含三种类型文件.modules/.dll/.pdb都提交，当然也包括c++代码。
 2.必须保持整个工程中所有.modules文件中buildid是一致的。否则将提示The following modules are missing or built with a different engine version
