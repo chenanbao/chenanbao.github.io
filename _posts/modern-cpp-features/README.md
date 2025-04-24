@@ -149,7 +149,7 @@ C++11 包含以下新的库特性:
 
 ### Coroutines
 
-> **Note:** While these examples illustrate how to use coroutines at a basic level, there is lots more going on when the code is compiled. These examples are not meant to be complete coverage of C++20's coroutines. Since the `generator` and `task` classes are not provided by the standard library yet, I used the cppcoro library to compile these examples.
+> **注意:** 虽然这些示例展示了如何在基本层面上使用协程，但在代码编译时还需继续补充更多才行。这些示例并非旨在全面涵盖 C++20 的协程。由于标准库尚未提供 `generator` 和`task`类，我使用了 cppcoro 库来编译这些示例。
 
 _Coroutines_ are special functions that can have their execution suspended and resumed. To define a coroutine, the `co_return`, `co_await`, or `co_yield` keywords must be present in the function's body. C++20's coroutines are stackless; unless optimized out by the compiler, their state is allocated on the heap.
 
@@ -1815,7 +1815,7 @@ static_assert(x == y, "x != y");
 ```
 
 ### auto
-`auto`-typed variables are deduced by the compiler according to the type of their initializer.
+`auto`类型的变量由编译器根据其初始值设定项的类型推导得出。
 ```c++
 auto a = 3.14; // double
 auto b = 1; // int
@@ -1830,7 +1830,7 @@ auto l = 1, m = true, n = 1.61; // error -- `l` deduced to be int, `m` is bool
 auto o; // error -- `o` requires initializer
 ```
 
-Extremely useful for readability, especially for complicated types:
+对于可读性非常有用，尤其是对于复杂类型:
 ```c++
 std::vector<int> v = ...;
 std::vector<int>::const_iterator cit = v.cbegin();
@@ -1838,7 +1838,7 @@ std::vector<int>::const_iterator cit = v.cbegin();
 auto cit = v.cbegin();
 ```
 
-Functions can also deduce the return type using `auto`. In C++11, a return type must be specified either explicitly, or using `decltype` like so:
+函数也可以使用 `auto`推导返回类型。在 C++11 中，返回类型必须显式指定，或者像这样使用`decltype` 指定：
 ```c++
 template <typename X, typename Y>
 auto add(X x, Y y) -> decltype(x + y) {
