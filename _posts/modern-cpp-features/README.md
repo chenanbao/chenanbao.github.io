@@ -21,7 +21,7 @@ C++20 包含以下新的语言特性:
 - [constinit](#constinit)
 - [\_\_VA\_OPT\_\_](#__VA_OPT__)
 
-C++20 includes the following new library features:
+C++20 包含以下新的库特性:
 - [concepts library](#concepts-library)
 - [formatting library](#formatting-library)
 - [synchronized buffered outputstream](#synchronized-buffered-outputstream)
@@ -58,7 +58,7 @@ C++17 包含以下新的语言特性:
 - [\_\_has\_include](#\_\_has\_include)
 - [class template argument deduction](#class-template-argument-deduction)
 
-C++17 includes the following new library features:
+C++17 包含以下新的库特性:
 - [std::variant](#stdvariant)
 - [std::optional](#stdoptional)
 - [std::any](#stdany)
@@ -88,7 +88,7 @@ C++14 包含以下新的语言特性:
 - [variable templates](#variable-templates)
 - [\[\[deprecated\]\] attribute](#deprecated-attribute)
 
-C++14 includes the following new library features:
+C++14 包含以下新的库特性:
 - [user-defined literals for standard library types](#user-defined-literals-for-standard-library-types)
 - [compile-time integer sequences](#compile-time-integer-sequences)
 - [std::make_unique](#stdmake_unique)
@@ -127,7 +127,7 @@ C++11 包含以下新的语言特性:
 - [char32_t and char16_t](#char32_t-and-char16_t)
 - [raw string literals](#raw-string-literals)
 
-C++11 includes the following new library features:
+C++11 包含以下新的库特性:
 - [std::move](#stdmove)
 - [std::forward](#stdforward)
 - [std::thread](#stdthread)
@@ -976,7 +976,7 @@ struct S {
 ```
 
 ### Nested namespaces
-Using the namespace resolution operator to create nested namespace definitions.
+使用命名空间解析运算符创建嵌套命名空间定义
 ```c++
 namespace A {
   namespace B {
@@ -987,7 +987,7 @@ namespace A {
 }
 ```
 
-The code above can be written like this:
+上述代码可以这样写：
 ```c++
 namespace A::B::C {
   int i;
@@ -1685,21 +1685,21 @@ foo(std::make_unique<T>(), function_that_throws(), std::make_unique<T>());
 
 See the section on [smart pointers (C++11)](#smart-pointers) for more information on `std::unique_ptr` and `std::shared_ptr`.
 
-## C++11 Language Features
+## C++11 语言特性
 
-### Move semantics
-Moving an object means to transfer ownership of some resource it manages to another object.
+###  Move semantics
+移动一个对象表示把一些资源的所有权转移给另外一个对象。
 
-The first benefit of move semantics is performance optimization. When an object is about to reach the end of its lifetime, either because it's a temporary or by explicitly calling `std::move`, a move is often a cheaper way to transfer resources. For example, moving a `std::vector` is just copying some pointers and internal state over to the new vector -- copying would involve having to copy every single contained element in the vector, which is expensive and unnecessary if the old vector will soon be destroyed.
+移动语义(Move semantics)的第一个好处是性能优化。当一个对象即将到达其生命周期结束时，无论是因为它是一个临时对象，还是通过显式调用std::move，移动通常是一种成本更低的资源转移方式。例如，移动一个std::vector仅仅是将一些指针和内部状态复制到新的vector中 —— 而复制则需要复制vector中包含的每一个元素，如果旧vector很快就会被销毁，这样做既昂贵又不必要。
 
-Moves also make it possible for non-copyable types such as `std::unique_ptr`s ([smart pointers](#smart-pointers)) to guarantee at the language level that there is only ever one instance of a resource being managed at a time, while being able to transfer an instance between scopes.
+移动操作还使得诸如`std::unique_ptr`([smart pointers](#smart-pointers))这样的不可复制类型，能够在语言层面上保证，在任何时刻都只有一个实例在管理某个资源，同时还能够在不同作用域之间转移实例。
 
-See the sections on: [rvalue references](#rvalue-references), [special member functions for move semantics](#special-member-functions-for-move-semantics), [`std::move`](#stdmove), [`std::forward`](#stdforward), [`forwarding references`](#forwarding-references).
+请参阅关于以下内容的章节: [rvalue references](#rvalue-references), [special member functions for move semantics](#special-member-functions-for-move-semantics), [`std::move`](#stdmove), [`std::forward`](#stdforward), [`forwarding references`](#forwarding-references).
 
 ### Rvalue references
-C++11 introduces a new reference termed the _rvalue reference_. An rvalue reference to `T`, which is a non-template type parameter (such as `int`, or a user-defined type), is created with the syntax `T&&`. Rvalue references only bind to rvalues.
+C++11 引入了一种新的引用，称为右值引用. 对T（T为非模板类型形参，例如int或用户自定义类型）的右值引用通过语法T&&创建。 右值引用仅绑定到右值.
 
-Type deduction with lvalues and rvalues:
+左值和右值的类型推导:
 ```c++
 int x = 0; // `x` is an lvalue of type `int`
 int& xl = x; // `xl` is an lvalue of type `int&`
@@ -1718,25 +1718,25 @@ f(xr2);           // calls f(int&)
 f(std::move(xr2)); // calls f(int&& x)
 ```
 
-See also: [`std::move`](#stdmove), [`std::forward`](#stdforward), [`forwarding references`](#forwarding-references).
+另见: [`std::move`](#stdmove), [`std::forward`](#stdforward), [`forwarding references`](#forwarding-references).
 
 ### Forwarding references
-Also known (unofficially) as _universal references_. A forwarding reference is created with the syntax `T&&` where `T` is a template type parameter, or using `auto&&`. This enables _perfect forwarding_: the ability to pass arguments while maintaining their value category (e.g. lvalues stay as lvalues, temporaries are forwarded as rvalues).
+也被（非正式地）称为 “万能引用”。转发引用（Forwarding references）通过语法`T&&`创建，其中`T`是模板类型参数，或者使用`auto&&`。这实现了 “完美转发”：即在传递参数时保持其值类别（例如，左值保持为左值，临时对象作为右值转发）的能力。
 
-Forwarding references allow a reference to bind to either an lvalue or rvalue depending on the type. Forwarding references follow the rules of _reference collapsing_:
+转发引用允许根据类型将引用绑定到左值或右值。转发引用遵循 “引用折叠” 规则：
 * `T& &` becomes `T&`
 * `T& &&` becomes `T&`
 * `T&& &` becomes `T&`
 * `T&& &&` becomes `T&&`
 
-`auto` type deduction with lvalues and rvalues:
+使用左值和右值进行`auto`类型推导:
 ```c++
 int x = 0; // `x` is an lvalue of type `int`
 auto&& al = x; // `al` is an lvalue of type `int&` -- binds to the lvalue, `x`
 auto&& ar = 0; // `ar` is an lvalue of type `int&&` -- binds to the rvalue temporary, `0`
 ```
 
-Template type parameter deduction with lvalues and rvalues:
+使用左值和右值进行模板类型参数推导:
 ```c++
 // Since C++14 or later:
 void f(auto&& t) {
@@ -1761,7 +1761,7 @@ f(z); // T is int&, deduces as f(int& &&) => f(int&)
 f(std::move(z)); // T is int, deduces as f(int &&) => f(int&&)
 ```
 
-See also: [`std::move`](#stdmove), [`std::forward`](#stdforward), [`rvalue references`](#rvalue-references).
+另见: [`std::move`](#stdmove), [`std::forward`](#stdforward), [`rvalue references`](#rvalue-references).
 
 ### Variadic templates
 The `...` syntax creates a _parameter pack_ or expands one. A template _parameter pack_ is a template parameter that accepts zero or more template arguments (non-types, types, or templates). A template with at least one parameter pack is called a _variadic template_.
@@ -1806,7 +1806,7 @@ sum({}); // == 0
 ```
 
 ### Static assertions
-Assertions that are evaluated at compile-time.
+在编译时求值的断言.
 ```c++
 constexpr int x = 0;
 constexpr int y = 1;
@@ -2054,7 +2054,9 @@ struct B : A {}; // error -- base 'A' is marked 'final'
 ```
 
 ### Default functions
-A more elegant, efficient way to provide a default implementation of a function, such as a constructor.
+一种更优雅、高效的方式来为函数（如构造函数）提供默认实现。
+
+你为结构体或类定义了其他带参数的构造函数时，编译器就不会再自动生成默认构造函数了。所以，如果你既需要带参数的构造函数，又需要默认构造函数，就可以使用 = default 来显式地要求编译器生成默认构造函数
 ```c++
 struct A {
   A() = default;
@@ -2081,7 +2083,7 @@ C c; // c.x == 1
 ```
 
 ### Deleted functions
-A more elegant, efficient way to provide a deleted implementation of a function. Useful for preventing copies on objects.
+一种更优雅、高效的方式来提供函数的已删除实现。这对于防止对象的复制很有用。
 ```c++
 class A {
   int x;
@@ -2098,14 +2100,14 @@ y = x; // error -- operator= deleted
 ```
 
 ### Range-based for loops
-Syntactic sugar for iterating over a container's elements.
+用于迭代容器元素的语法糖。
 ```c++
 std::array<int, 5> a {1, 2, 3, 4, 5};
 for (int& x : a) x *= 2;
 // a == { 2, 4, 6, 8, 10 }
 ```
 
-Note the difference when using `int` as opposed to `int&`:
+请注意使用`int`与 `int&`时的区别：
 ```c++
 std::array<int, 5> a {1, 2, 3, 4, 5};
 for (int x : a) x *= 2;
