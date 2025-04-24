@@ -1384,7 +1384,7 @@ std::cout << guid; // e.g. G1fW2
 ```
 
 ### std::clamp
-Clamp given value between a lower and upper bound.
+将给定值限制在上下限之间。
 ```c++
 std::clamp(42, -1, 1); // == 1
 std::clamp(-42, -1, 1); // == -1
@@ -1435,7 +1435,7 @@ std::transform_exclusive_scan(std::cbegin(a), std::cend(a),
 ```
 
 ### GCD and LCM
-Greatest common divisor (GCD) and least common multiple (LCM).
+最大公约数 (GCD) 和 最小公倍数 (LCM).
 ```c++
 const int p = 9;
 const int q = 3;
