@@ -373,7 +373,7 @@ f1 == f2; // == false
 f1 >= f2; // == false
 ```
 
-You can also define your own comparisons:
+你也可以定义自己的比较方式:
 ```c++
 struct foo {
   int x;
@@ -392,7 +392,7 @@ f1 >= f2; // == true
 ```
 
 ### Designated initializers
-C-style designated initializer syntax. Any member fields that are not explicitly listed in the designated initializer list are default-initialized.
+C 风格的指定初始化器语法。在指定初始化器列表中未明确列出的任何成员字段都将进行默认初始化。.
 ```c++
 struct A {
   int x;
@@ -404,7 +404,7 @@ A a {.x = 1, .z = 2}; // a.x == 1, a.y == 0, a.z == 2
 ```
 
 ### Template syntax for lambdas
-Use familiar template syntax in lambda expressions.
+在 lambda 表达式中使用熟悉的模板语法.
 ```c++
 auto f = []<typename T>(std::vector<T> v) {
   // ...
@@ -412,7 +412,7 @@ auto f = []<typename T>(std::vector<T> v) {
 ```
 
 ### Range-based for loop with initializer
-This feature simplifies common code patterns, helps keep scopes tight, and offers an elegant solution to a common lifetime problem.
+此功能简化了常见的代码模式，有助于保持作用域紧凑，并为常见的生命周期问题提供了优雅的解决方案。
 ```c++
 for (auto v = std::vector{1, 2, 3}; auto& e : v) {
   std::cout << e;
@@ -421,7 +421,7 @@ for (auto v = std::vector{1, 2, 3}; auto& e : v) {
 ```
 
 ### \[\[likely\]\] and \[\[unlikely\]\] attributes
-Provides a hint to the optimizer that the labelled statement has a high probability of being executed.
+向优化器提供一个提示，表明带标签的语句很有可能被执行
 ```c++
 switch (n) {
 case 1:
@@ -535,7 +535,7 @@ int r2 = sqr(x); // ERROR: the value of 'x' is not usable in a constant expressi
 ```
 
 ### using enum
-Bring an enum's members into scope to improve readability. Before:
+将枚举成员引入作用域以提高可读性。之前：
 ```c++
 enum class rgba_color_channel { red, green, blue, alpha };
 
@@ -548,7 +548,7 @@ std::string_view to_string(rgba_color_channel channel) {
   }
 }
 ```
-After:
+现在:
 ```c++
 enum class rgba_color_channel { red, green, blue, alpha };
 
@@ -586,13 +586,13 @@ auto f(Args&&... args){
 ```
 
 ### char8_t
-Provides a standard type for representing UTF-8 strings.
+提供了一种用于表示 UTF-8 字符串的标准类型.
 ```c++
 char8_t utf8_str[] = u8"\u0123";
 ```
 
 ### constinit
-The `constinit` specifier requires that a variable must be initialized at compile-time.
+ `constinit`说明符要求变量必须在编译时初始化。
 ```c++
 const char* g() { return "dynamic initialization"; }
 constexpr const char* f(bool p) { return p ? "constant initializer" : g(); }
@@ -1924,7 +1924,7 @@ foo(nullptr); // calls foo(char*)
 ```
 
 ### Strongly-typed enums
-Type-safe enums that solve a variety of problems with C-style enums including: implicit conversions, inability to specify the underlying type, scope pollution.
+类型安全的枚举，解决了 C 风格枚举的各种问题，包括：隐式转换、无法指定底层类型、作用域污染。
 ```c++
 // Specifying underlying type as `unsigned int`
 enum class Color : unsigned int { Red = 0xff0000, Green = 0xff00, Blue = 0xff };
@@ -1983,7 +1983,7 @@ constexpr Complex I(0, 1);
 ```
 
 ### Delegating constructors
-Constructors can now call other constructors in the same class using an initializer list.
+构造函数现在可以使用初始化列表调用同一类中的其他构造函数。
 ```c++
 struct Foo {
   int foo;
@@ -2018,7 +2018,7 @@ int operator "" _int(const char* str, std::size_t) {
 ```
 
 ### Explicit virtual overrides
-Specifies that a virtual function overrides another virtual function. If the virtual function does not override a parent's virtual function, throws a compiler error.
+指定一个虚函数重写另一个虚函数。如果该虚函数没有重写父类的虚函数，则抛出编译错误。
 ```c++
 struct A {
   virtual void foo();
@@ -2033,7 +2033,7 @@ struct B : A {
 ```
 
 ### Final specifier
-Specifies that a virtual function cannot be overridden in a derived class or that a class cannot be inherited from.
+指定一个虚函数不能在派生类中被重写，或者一个类不能被继承。
 ```c++
 struct A {
   virtual void foo();
@@ -2048,7 +2048,7 @@ struct C : B {
 };
 ```
 
-Class cannot be inherited from.
+类不能被继承。
 ```c++
 struct A final {};
 struct B : A {}; // error -- base 'A' is marked 'final'
@@ -2141,7 +2141,7 @@ a1 = f(A{}); // move-assignment from rvalue temporary
 ```
 
 ### Converting constructors
-Converting constructors will convert values of braced list syntax into constructor arguments.
+转换构造函数会将花括号列表语法的值转换为构造函数参数。
 ```c++
 struct A {
   A(int) {}
@@ -2155,7 +2155,7 @@ A c = {0, 0}; // calls A::A(int, int)
 A d {0, 0, 0}; // calls A::A(int, int, int)
 ```
 
-Note that the braced list syntax does not allow narrowing:
+请注意，带花括号的列表语法不允许进行类型缩小:
 ```c++
 struct A {
   A(int) {}
@@ -2219,7 +2219,7 @@ bool firstVersion {Program::isFirstVersion()};    // Does not compile when Versi
 ```
 
 ### Non-static data member initializers
-Allows non-static data members to be initialized where they are declared, potentially cleaning up constructors of default initializations.
+允许非静态数据成员在声明处进行初始化，这有可能简化默认初始化的构造函数。
 
 ```c++
 // Default initialization prior to C++11
@@ -2236,7 +2236,7 @@ class Human {
 ```
 
 ### Right angle brackets
-C++11 is now able to infer when a series of right angle brackets is used as an operator or as a closing statement of typedef, without having to add whitespace.
+C++11 现在能够推断出，当一系列右尖括号用作运算符，还是用作类型定义（typedef）的结束语句时，无需添加空格。
 
 ```c++
 typedef std::map<int, std::map <int, std::map <int, int> > > cpp98LongTypedef;
@@ -2325,7 +2325,7 @@ void g() noexcept {
 ```
 
 ### char32_t and char16_t
-Provides standard types for representing UTF-8 strings.
+提供用于表示 UTF-8 字符串的标准类型
 ```c++
 char32_t utf8_str[] = U"\u0123";
 char16_t utf8_str[] = u"\u0123";
