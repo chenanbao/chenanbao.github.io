@@ -1097,7 +1097,8 @@ switch (n) {
 }
 ```
 
-* `[[nodiscard]]` issues a warning when either a function or class has this attribute and its return value is discarded.
+* 当函数或类具有`[[nodiscard]]`属性且其返回值被丢弃时，会发出警告。
+
 ```c++
 [[nodiscard]] bool do_something() {
   return is_success; // true for success, false for failure
