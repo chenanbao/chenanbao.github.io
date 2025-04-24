@@ -1,8 +1,8 @@
 # C++20/17/14/11
 
-## Overview
+## 概述
 
-C++20 includes the following new language features:
+C++20 包含以下新的语言特性:
 - [coroutines](#coroutines)
 - [concepts](#concepts)
 - [three-way comparison](#three-way-comparison)
@@ -40,7 +40,7 @@ C++20 includes the following new library features:
 - [three-way comparison helpers](#three-way-comparison-helpers)
 - [std::lexicographical_compare_three_way](#stdlexicographical_compare_three_way)
 
-C++17 includes the following new language features:
+C++17 包含以下新的语言特性:
 - [template argument deduction for class templates](#template-argument-deduction-for-class-templates)
 - [declaring non-type template parameters with auto](#declaring-non-type-template-parameters-with-auto)
 - [folding expressions](#folding-expressions)
@@ -78,7 +78,7 @@ C++17 includes the following new library features:
 - [string conversion to/from numbers](#string-conversion-tofrom-numbers)
 - [rounding functions for chrono durations and timepoints](#rounding-functions-for-chrono-durations-and-timepoints)
 
-C++14 includes the following new language features:
+C++14 包含以下新的语言特性:
 - [binary literals](#binary-literals)
 - [generic lambda expressions](#generic-lambda-expressions)
 - [lambda capture initializers](#lambda-capture-initializers)
@@ -93,7 +93,7 @@ C++14 includes the following new library features:
 - [compile-time integer sequences](#compile-time-integer-sequences)
 - [std::make_unique](#stdmake_unique)
 
-C++11 includes the following new language features:
+C++11 包含以下新的语言特性:
 - [move semantics](#move-semantics)
 - [variadic templates](#variadic-templates)
 - [rvalue references](#rvalue-references)
