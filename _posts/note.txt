@@ -17,6 +17,13 @@ GameMode深度适配FPS
 
 性能/画质/功能特性不可能都要，找到平衡
 
+你要靠自己,在一点点的摸索里,收获到:
+1.如何在未知的领域找到一条可行的阶梯的经验和勇气
+2.如何鉴别一份学习资料是否花时间看的判断力
+3.为自己设计任务的主观能动性
+4.亲自捉刀,从无到有构建一个完备逻辑的耐心和毅力
+5.没有人为你兜底,你就是最后和最终责任人的觉悟
+
 困难模式：
 
 增量打包
@@ -223,6 +230,8 @@ deleted 函数不能以任何方式被调用，即使你在成员函数或者友
 在 32 位操作系统中，地址空间为 2^32 个不同的地址，这意味着需要 32 位（即 4 字节）来表示一个内存地址。因此，在 32 位操作系统中，无论指针指向何种数据类型，其大小通常为 4 字节
 在 64 位操作系统中，地址空间为 2^64 个不同的地址，需要 64 位（即 8 字节）来表示一个内存地址。所以，在 64 位操作系统中，指针的大小通常为 8 字节
 
+在 Linux 内核里，list_head 是一种非常关键的数据结构，它实现了一个双向循环链表。这种链表设计十分巧妙，它不存储数据，仅仅作为链表节点的连接件，这样就能把不同类型的数据结构串起来。
+
 
 为了以后美术不装visualstudio编译代码，直接从编译好的环境启动工程。望大家按照下面流程提交c++修改。（仅供修改c++同学注意）
 1.如果修改了C++需提交Binaries目录，其下包含三种类型文件.modules/.dll/.pdb都提交，当然也包括c++代码。
@@ -298,6 +307,18 @@ Ctrl + Tab	切换打开的文件
 搜索 Shift + Shift
 打开当前光标所在代码的上下文菜单：Alt + Enter
 
+Typing
+dazidazi.com
+https://www.edclub.com/sportal/program-3.game
+https://typing.io/
+https://www.keybr.com/
+https://www.ratatype.com/
+https://www.kidztype.com/typing-web/symbol-lesson-1_3fdc70d14.html
+https://www.monkey-type.org/
+
+
+https://wiki.libsdl.org/SDL3/CategoryGPU
+https://www.sfml-dev.org/
 
 ui
 https://github.com/chromiumembedded
@@ -306,6 +327,9 @@ https://github.com/chromiumembedded
 https://angelscript.hazelight.se/
 https://github.com/Tencent/puerts
 https://github.com/Tencent/UnLua
+
+算法
+https://visualgo.net/en
 
 
 GameEngine
